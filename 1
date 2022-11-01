@@ -1,0 +1,128 @@
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(psych)
+getwd()
+trial_data =read.delim("Assignment_dataset (2).txt")
+colnames(trial_data)
+class(trial_data)
+dim(trial_data)
+head(trial_data)
+tail(trial_data)
+attach(trial_data)
+names(trial_data)
+summary(trial_data)
+describe(trial_data)
+mean(IL1B_pre)
+mean(CX3CL1_pre)
+mean(TNFA_pre)
+mean(CCL20_pre)
+hist(IL1B_pre)
+hist(CX3CL1_pre)
+hist(TNFA_pre)
+hist(CCL20_pre)
+
+# Here we are doing normality checks for each treatment group
+# Data manipulation and summary statistics are performed using the dplyr package. Boxplots are created using the ggplot2 package.
+# QQ plots are created with the qqplotr package. 
+# The t.test function is included in the base stats package.
+shapiro.test(IL1B_pre)
+shapiro.test(CX3CL1_pre)
+shapiro.test(TNFA_pre)
+shapiro.test(CCL20_pre)
+             qqnorm(IL1B_pre)
+             qqnorm(CX3CL1_pre)
+             qqnorm(TNFA_pre)
+             qqnorm(CCL20_pre)
+             
+             
+tras_test <- trial_data[Treatment_Arm == 'Trastuzumab',]
+lap_test <- trial_data[Treatment_Arm == 'Lapatinib',]
+
+sorted_treatment_arm <- sort(Treatment_Arm)
+sorted_treatment_arm
+
+Lapatinib_Treatment_Arm <- sorted_treatment_arm[1:48]
+Trastuzumab_Treatment_Arm <- sorted_treatment_arm[49:88]             
+
+boxplot(IL1B_pre~Treatment_Arm)
+boxplot(CX3CL1_pre~Treatment_Arm)
+boxplot(TNFA_pre~Treatment_Arm)
+boxplot(CCL20_pre~Treatment_Arm,names=c('lap','tras'))
+
+
+### IL1B Test
+# Here we are doing a two sample T -test to determine if the expression level of IL1B differs between tretament arms
+L_IL1B_Pre <- IL1B_pre[1:48]
+L_IL1B_Pre
+T_IL1B_Pre <- IL1B_pre[49:88] 
+T_IL1B_Pre
+t.test(T_IL1B_Pre, L_IL1B_Pre,var.equal=TRUE)
+
+# Here we assumed that the variance was equal, but is that the case?
+var(T_IL1B_Pre)
+var(L_IL1B_Pre)
+var.test(T_IL1B_Pre, L_IL1B_Pre)
+# The variance is equal, the two var tests are v similar but just to double check we fun an f-test, as you can see the signifigance is 0.8 therefore is its not signifigant and they do have equal variance
+
+
+L_CX3CL1_Pre <- CX3CL1_pre[1:48]
+L_CX3CL1_Pre
+T_CX3CL1_Pre <- CX3CL1_pre[49:88] 
+T_CX3CL1_Pre
+wilcox.test(L_CX3CL1_Pre, T_CX3CL1_Pre)
+
+L_TNFA_Pre <- TNFA_pre[1:48]
+L_TNFA_Pre
+T_TNFA_Pre <- TNFA_pre[49:88] 
+T_TNFA_Pre
+wilcox.test(L_TNFA_Pre, T_TNFA_Pre)
+
+L_CCL20_Pre <- CCL20_pre[1:48]
+L_CCL20_Pre
+T_CCL20_Pre <- CCL20_pre[49:88] 
+T_CCL20_Pre
+wilcox.test(L_CCL20_Pre, T_CCL20_Pre)
+
+### 
+sort_ER <- sort(ER_status)
+sort_ER[31:88]
+table(sort_ER)
+cor.test(Treatment_Response$ER_status)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("RBioinf")
+library(RBioinf)
+BiocManager::install("ape")
+library(ape)
+BiocManager::install("rcompanion")
+library(rcompanion)
+two_way <- table(trial_data$Treatment_Response, trial_data$ER_status)
+two_way
+chisq.test(two_way, correct=FALSE)$expected
+pairwiseNominalIndependence(two_way, compare = "row", fisher=FALSE, gtest=FALSE, chisq=TRUE,method="fdr",digits  = 3)
+###
+#3.	Is there a statistically significant difference between the expression levels of the 4 immune cell markers in the Trastuzumab treatment arm (pre-treatment), and where does that difference lie?
+shapiro.test(TNFA_pre,IL1B_pre)
+kruskal.test(~Time)
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("FSA")
+library(FSA)
+BiocManager::install("PMCMRplus")
+library(PMCMRplus)
+
+tras_test_reshaped <- tras_test %>%gather(Marker, Expression, IL1B_pre:CCL20_pre)
+tras_test_reshaped
+kruskal.test(Expression ~ as.factor(Marker), data = tras_test_reshaped)
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+install.packages("BiocManager")
+BiocManager::install("FSA")
+library(FSA)
+
+dunnTest(Expression~as.factor(Marker),
+         data= tras_test_reshaped,
+         method="bh")
