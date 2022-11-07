@@ -126,3 +126,65 @@ library(FSA)
 dunnTest(Expression~as.factor(Marker),
          data= tras_test_reshaped,
          method="bh")
+# Redone question1 
+
+shapiro.test(IL1B_pre)
+shapiro.test(CX3CL1_pre)
+shapiro.test(TNFA_pre)
+shapiro.test(CCL20_pre)
+
+Lapatinib_Treatment_Arm <- sorted_treatment_arm[1:48]
+Trastuzumab_Treatment_Arm <- sorted_treatment_arm[49:88]
+
+L_IL1B_Pre <- IL1B_pre[1:48]
+L_IL1B_Pre
+T_IL1B_Pre <- IL1B_pre[49:88] 
+T_IL1B_Pre
+
+L_CX3CL1_Pre <- CX3CL1_pre[1:48]
+L_CX3CL1_Pre
+T_CX3CL1_Pre <- CX3CL1_pre[49:88] 
+T_CX3CL1_Pre
+
+L_TNFA_Pre <- TNFA_pre[1:48]
+L_TNFA_Pre
+T_TNFA_Pre <- TNFA_pre[49:88] 
+T_TNFA_Pre
+
+L_CCL20_Pre <- CCL20_pre[1:48]
+L_CCL20_Pre
+T_CCL20_Pre <- CCL20_pre[49:88] 
+T_CCL20_Pre
+
+t.test(T_IL1B_Pre, L_IL1B_Pre,var.equal=TRUE)
+var(T_IL1B_Pre)
+var(L_IL1B_Pre)
+var.test(T_IL1B_Pre, L_IL1B_Pre)
+
+(mean(L_IL1B_Pre)-mean(T_IL1B_Pre)) / sqrt((sd(L_IL1B_Pre)^2+sd(T_IL1B_Pre)^2)/2)
+d<-cohen.d(L_IL1B_Pre, T_IL1B_Pre)
+pwr.t.test( d = d$estimate, sig.level =0.05 , power =0.8 )
+
+shapiro.test(L_IL1B_Pre)
+shapiro.test(T_IL1B_Pre)
+var(T_IL1B_Pre)
+var(L_IL1B_Pre)                                         # Significant - pvalue of 0.002094
+var.test(T_IL1B_Pre, L_IL1B_Pre)
+t.test(T_IL1B_Pre, L_IL1B_Pre,var.equal=TRUE)
+
+
+
+shapiro.test(L_CX3CL1_Pre)
+shapiro.test(T_CX3CL1_Pre)
+var(T_CX3CL1_Pre)
+var(L_CX3CL1_Pre)                                       # Not significant - pvalue of 0.08273
+var.test(T_CX3CL1_Pre, L_CX3CL1_Pre)
+t.test(T_CX3CL1_Pre, L_CX3CL1_Pre,var.equal=TRUE)
+
+shapiro.test(L_TNFA_Pre)
+shapiro.test(T_TNFA_Pre)                                 # Not significant - pvalue of 0.1443
+wilcox.test(L_TNFA_Pre, T_TNFA_Pre)
+
+shapiro.test(L_CCL20_Pre)
+shapiro.test(T_CCL20_Pre)
+wilcox.test(L_CCL20_Pre, T_CCL20_Pre)                   # Not significant - pvalue of 0.9432
