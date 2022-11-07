@@ -1,0 +1,402 @@
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(psych)
+library(ggpubr)
+library(rstatix)
+library(qqplotr)
+library(gridExtra)
+getwd()
+trial_data =read.delim("Assignment_dataset (2).txt")
+attach(trial_data)
+colnames(trial_data)
+class(trial_data)
+dim(trial_data)
+head(trial_data)
+tail(trial_data)
+names(trial_data)
+summary(trial_data)
+describe(trial_data)
+
+
+mean(IL1B_pre)
+mean(CX3CL1_pre)
+mean(TNFA_pre)
+mean(CCL20_pre)
+hist(IL1B_pre)
+hist(CX3CL1_pre)
+hist(TNFA_pre)
+hist(CCL20_pre)
+
+# Here we are doing normality checks for each treatment group
+# Data manipulation and summary statistics are performed using the dplyr package. Boxplots are created using the ggplot2 package.
+# QQ plots are created with the qqplotr package. 
+# The t.test function is included in the base stats package.
+shapiro.test(IL1B_pre)
+shapiro.test(CX3CL1_pre)
+shapiro.test(TNFA_pre)
+shapiro.test(CCL20_pre)
+qqnorm(IL1B_pre)
+qqnorm(CX3CL1_pre)
+qqnorm(TNFA_pre)
+qqnorm(CCL20_pre)
+
+
+tras_test <- trial_data[Treatment_Arm == 'Trastuzumab',]
+lap_test <- trial_data[Treatment_Arm == 'Lapatinib',]
+
+
+Lapatinib_Treatment_Arm <- sorted_treatment_arm[1:48]
+Trastuzumab_Treatment_Arm <- sorted_treatment_arm[49:88]             
+
+boxplot(IL1B_pre~Treatment_Arm)
+boxplot(CX3CL1_pre~Treatment_Arm)
+boxplot(TNFA_pre~Treatment_Arm)
+boxplot(CCL20_pre~Treatment_Arm)
+
+# Redone question1 
+
+shapiro.test(IL1B_pre)
+shapiro.test(CX3CL1_pre)
+shapiro.test(TNFA_pre)
+shapiro.test(CCL20_pre)
+
+Lapatinib_Treatment_Arm <- sorted_treatment_arm[1:48]
+Trastuzumab_Treatment_Arm <- sorted_treatment_arm[49:88]
+
+L_IL1B_Pre <- IL1B_pre[1:48]
+L_IL1B_Pre
+T_IL1B_Pre <- IL1B_pre[49:88] 
+T_IL1B_Pre
+
+L_CX3CL1_Pre <- CX3CL1_pre[1:48]
+L_CX3CL1_Pre
+T_CX3CL1_Pre <- CX3CL1_pre[49:88] 
+T_CX3CL1_Pre
+
+L_TNFA_Pre <- TNFA_pre[1:48]
+L_TNFA_Pre
+T_TNFA_Pre <- TNFA_pre[49:88] 
+T_TNFA_Pre
+
+L_CCL20_Pre <- CCL20_pre[1:48]
+L_CCL20_Pre
+T_CCL20_Pre <- CCL20_pre[49:88] 
+T_CCL20_Pre
+
+
+shapiro.test(L_IL1B_Pre)
+shapiro.test(T_IL1B_Pre)
+var(T_IL1B_Pre)
+var(L_IL1B_Pre)                                         # Significant - pvalue of 0.002094
+var.test(T_IL1B_Pre, L_IL1B_Pre)
+t.test(T_IL1B_Pre, L_IL1B_Pre,var.equal=TRUE)
+
+
+
+shapiro.test(L_CX3CL1_Pre)
+shapiro.test(T_CX3CL1_Pre)
+var(T_CX3CL1_Pre)
+var(L_CX3CL1_Pre)                                       # Not significant - pvalue of 0.08273
+var.test(T_CX3CL1_Pre, L_CX3CL1_Pre)
+t.test(T_CX3CL1_Pre, L_CX3CL1_Pre,var.equal=TRUE)
+
+shapiro.test(L_TNFA_Pre)
+shapiro.test(T_TNFA_Pre)                                 # Not significant - pvalue of 0.1443
+wilcox.test(L_TNFA_Pre, T_TNFA_Pre)
+
+shapiro.test(L_CCL20_Pre)
+shapiro.test(T_CCL20_Pre)
+wilcox.test(L_CCL20_Pre, T_CCL20_Pre)                   # Not significant - pvalue of 0.9432
+
+
+
+
+
+
+
+### 
+sort_ER <- sort(ER_status)
+sort_ER[31:88]
+table(sort_ER)
+cor.test(Treatment_Response,ER_status)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("RBioinf")
+library(RBioinf)
+BiocManager::install("ape")
+library(ape)
+BiocManager::install("rcompanion")
+library(rcompanion)
+two_way <- table(trial_data$Treatment_Response, trial_data$ER_status)
+two_way
+chisq.test(two_way, correct=FALSE)$expected
+pairwiseNominalIndependence(two_way, compare = "row", fisher=FALSE, gtest=FALSE, chisq=TRUE,method="fdr",digits  = 3)
+###
+#3.	Is there a statistically significant difference between the expression levels of the 4 immune cell markers in the Trastuzumab treatment arm (pre-treatment), and where does that difference lie?
+shapiro.test(TNFA_pre,IL1B_pre)
+kruskal.test(~Time)
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("FSA")
+library(FSA)
+BiocManager::install("PMCMRplus")
+library(PMCMRplus)
+
+tras_test_reshaped <- tras_test %>%gather(Marker, Expression, IL1B_pre:CCL20_pre)
+tras_test_reshaped
+kruskal.test(Expression ~ as.factor(Marker), data = tras_test_reshaped)
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("FSA")
+library(FSA)
+
+dunnTest(Expression~as.factor(Marker),
+         data= tras_test_reshaped,
+         method="bh")
+##################################################
+
+
+ # 1.	Is there a statistically significant difference in the expression levels of the 4 immune cell markers pre-treatment and post-treatment (analyze each marker separately)? 
+
+boxplot(IL1B_pre,IL1B_post)
+boxplot(CX3CL1_pre, CX3CL1_post)
+boxplot(TNFA_pre, TNFA_post)
+boxplot(CCL20_pre, CCL20_during)
+qqnorm(x =IL1B_pre, y =IL1B_post)
+qqnorm(x = CX3CL1_pre, y = CX3CL1_post)
+qqnorm(x = TNFA_pre, y = TNFA_post)
+qqnorm(x= CCL20_pre, y = CCL20_post)
+
+
+p1<-ggplot(data=trial_data, aes(x= IL1B_pre)) +
+  geom_histogram(aes(x=IL1B_pre, y=..density..), bins=50,fill="Purple",alpha = 0.15) +
+  stat_function(fun=dnorm, args = list(mean=mean(trial_data$IL1B_pre),
+                                       sd=sd(trial_data$IL1B_pre)), color="Purple",size=1)+
+  labs(title = "IL1B_pre")+theme_bw()
+
+p2<-ggplot(data=trial_data, aes(x=IL1B_post)) +
+  geom_histogram(aes(x=IL1B_post, y=..density..), bins=50,fill="blue",alpha = 0.15) +
+  stat_function(fun=dnorm, args = list(mean=mean(trial_data$IL1B_post),
+                                       sd=sd(trial_data$IL1B_post)), color="blue",size=1)+
+  labs(title = "IL1B_post")+theme_bw()
+grid.arrange(p1,p2,ncol=2)
+
+
+p3<-ggplot(data=trial_data, aes(x= CX3CL1_pre)) +
+  geom_histogram(aes(x=CX3CL1_pre, y=..density..), bins=50,fill="Purple",alpha = 0.15) +
+  stat_function(fun=dnorm, args = list(mean=mean(trial_data$CX3CL1_pre),
+                                       sd=sd(trial_data$CX3CL1_pre)), color="Purple",size=1)+
+  labs(title = "CX3CL1_pre")+theme_bw()
+
+p4<-ggplot(data=trial_data, aes(x=CX3CL1_post)) +
+  geom_histogram(aes(x=CX3CL1_post, y=..density..), bins=50,fill="blue",alpha = 0.15) +
+  stat_function(fun=dnorm, args = list(mean=mean(trial_data$CX3CL1_post),
+                                       sd=sd(trial_data$CX3CL1_post)), color="blue",size=1)+
+  labs(title = "CX3CL1_post")+theme_bw()
+grid.arrange(p3,p4,ncol=2)
+
+
+p5<-ggplot(data=trial_data, aes(x= TNFA_pre)) +
+  geom_histogram(aes(x=TNFA_pre, y=..density..), bins=50,fill="Purple",alpha = 0.15) +
+  stat_function(fun=dnorm, args = list(mean=mean(trial_data$TNFA_pre),
+                                       sd=sd(trial_data$TNFA_pre)), color="Purple",size=1)+
+  labs(title = "TNFA_pre")+theme_bw()
+
+p6<-ggplot(data=trial_data, aes(x=TNFA_post)) +
+  geom_histogram(aes(x=TNFA_post, y=..density..), bins=50,fill="blue",alpha = 0.15) +
+  stat_function(fun=dnorm, args = list(mean=mean(trial_data$TNFA_post),
+                                       sd=sd(trial_data$TNFA_post)), color="blue",size=1)+
+  labs(title = "TNFA_post")+theme_bw()
+grid.arrange(p5,p6,ncol=2)
+
+
+p7<-ggplot(data=trial_data, aes(x= CCL20_pre)) +
+  geom_histogram(aes(x=CCL20_pre, y=..density..), bins=50,fill="Purple",alpha = 0.15) +
+  stat_function(fun=dnorm, args = list(mean=mean(trial_data$CCL20_pre),
+                                       sd=sd(trial_data$CCL20_pre)), color="Purple",size=1)+
+  labs(title = "CCL20_pre")+theme_bw()
+
+p8<-ggplot(data=trial_data, aes(x=CCL20_post)) +
+  geom_histogram(aes(x=CCL20_post, y=..density..), bins=50,fill="blue",alpha = 0.15) +
+  stat_function(fun=dnorm, args = list(mean=mean(trial_data$CCL20_post),
+                                       sd=sd(trial_data$CCL20_post)), color="blue",size=1)+
+  labs(title = "CCL20_post")+theme_bw()
+grid.arrange(p7,p8,ncol=2)
+
+shapiro.test(IL1B_post)
+shapiro.test(CX3CL1_post)
+shapiro.test(TNFA_post)
+shapiro.test(CCL20_post)
+shapiro.test(IL1B_pre)
+shapiro.test(CX3CL1_pre)
+shapiro.test(TNFA_pre)
+shapiro.test(CCL20_pre)
+
+IL1B_shapiro <- trial_data %>%gather(IL1B, Expression, IL1B_pre, IL1B_post) 
+shapiro.test(IL1B_shapiro$Expression)
+CX3CL1_shapiro <- trial_data %>%gather(CX3CL1, Expression, CX3CL1_pre, CX3CL1_post) 
+shapiro.test(CX3CL1_shapiro$Expression)
+TNFA_shapiro <- trial_data %>%gather(TNFA, Expression, TNFA_pre, TNFA_post) 
+shapiro.test(TNFA_shapiro$Expression)
+CCL20_shapiro <- trial_data %>%gather(CCL20, Expression, CCL20_pre, CCL20_post) 
+shapiro.test(CCL20_shapiro$Expression)
+
+wilcox.test(IL1B_pre,IL1B_post,paired=TRUE)
+wilcox.test(CX3CL1_pre, CX3CL1_post,paired=TRUE)
+wilcox.test(TNFA_pre, TNFA_post,paired=TRUE)
+wilcox.test(CCL20_pre, CCL20_post,paired=TRUE)
+
+# Is there a significant increase in the number of patient underweight post treatment (classed as a BMI of < 20)? )
+
+BMIPre <- ifelse(trial_data$BMI_pre_treatment <20,
+                        c("Underweight"), c("Normal"))
+trial_data$BMI_pre_treatment 
+table(trial_data$BMI_pre_treatment)
+
+BMIPost <- ifelse(trial_data$BMI_post_treatment <20,
+                                       c("Underweight"), c("Normal"))
+trial_data$BMI_post_treatment 
+table(trial_data$BMI_post_treatment)
+
+BMI_Test<- matrix(c(81,7,67,21), nr=2, dimnames=list("Time"=c("Pre","Post"), "Underweight"=c("Yes","No")))
+BMI_Test
+chisq.test(BMI_Test)
+
+## 3.	Is there a statistically significant difference between the expression levels of the 4 immune cell markers over the course of the trial (3 time points, pre, during and post), and where does that difference lie?
+
+q3 <- trial_data[,c("IL1B_pre","CX3CL1_pre", "TNFA_pre", "CCL20_pre", "IL1B_during","CX3CL1_during", "TNFA_during", "CCL20_during", "IL1B_post", "CX3CL1_post" ,"TNFA_post", "CCL20_post")]
+# need to stack so that you have 4 columns, Markers, Pre, Post and During 
+
+
+
+
+
+
+
+
+############################################
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("sjstats")
+library(sjstats) 
+BiocManager::install("effsize")
+library(effsize)
+BiocManager::install("pwr")
+library(pwr)
+attach(trial_data)
+colnames(trial_data)
+dim(trial_data)
+
+shapiro.test(IL1B_pre)
+shapiro.test(CX3CL1_pre)
+shapiro.test(TNFA_pre)
+shapiro.test(CCL20_pre)
+
+Lapatinib_Treatment_Arm <- sorted_treatment_arm[1:48]
+Trastuzumab_Treatment_Arm <- sorted_treatment_arm[49:88]
+
+L_IL1B_Pre <- IL1B_pre[1:48]
+L_IL1B_Pre
+T_IL1B_Pre <- IL1B_pre[49:88] 
+T_IL1B_Pre
+
+L_CX3CL1_Pre <- CX3CL1_pre[1:48]
+L_CX3CL1_Pre
+T_CX3CL1_Pre <- CX3CL1_pre[49:88] 
+T_CX3CL1_Pre
+
+L_TNFA_Pre <- TNFA_pre[1:48]
+L_TNFA_Pre
+T_TNFA_Pre <- TNFA_pre[49:88] 
+T_TNFA_Pre
+
+L_CCL20_Pre <- CCL20_pre[1:48]
+L_CCL20_Pre
+T_CCL20_Pre <- CCL20_pre[49:88] 
+T_CCL20_Pre
+
+
+shapiro.test(L_IL1B_Pre)
+shapiro.test(T_IL1B_Pre)
+var(T_IL1B_Pre)
+var(L_IL1B_Pre)                                         # Significant - pvalue of 0.002094
+var.test(T_IL1B_Pre, L_IL1B_Pre)
+t.test(T_IL1B_Pre, L_IL1B_Pre,var.equal=TRUE)
+
+
+
+shapiro.test(L_CX3CL1_Pre)
+shapiro.test(T_CX3CL1_Pre)
+var(T_CX3CL1_Pre)
+var(L_CX3CL1_Pre)                                       # Not significant - pvalue of 0.08273
+var.test(T_CX3CL1_Pre, L_CX3CL1_Pre)
+t.test(T_CX3CL1_Pre, L_CX3CL1_Pre,var.equal=TRUE)
+
+(mean(L_CX3CL1_Pre)-mean(T_CX3CL1_Pre)) / sqrt((sd(L_CX3CL1_Pre)^2+sd(T_CX3CL1_Pre)^2)/2)
+a<-cohen.d(L_CX3CL1_Pre, T_CX3CL1_Pre)
+pwr.t.test( d = a$estimate, sig.level =0.05 , power =0.8 ) # n = 112.0989
+
+shapiro.test(L_TNFA_Pre)
+shapiro.test(T_TNFA_Pre)                                 # Not significant - pvalue of 0.1443
+wilcox.test(L_TNFA_Pre, T_TNFA_Pre)
+
+(mean(L_TNFA_Pre)-mean(T_TNFA_Pre)) / sqrt((sd(L_TNFA_Pre)^2+sd(T_TNFA_Pre)^2)/2)
+b<-cohen.d(L_TNFA_Pre, T_TNFA_Pre)
+pwr.t.test( d = b$estimate, sig.level =0.05 , power =0.8 ) #n = 248.4729
+
+shapiro.test(L_CCL20_Pre)
+shapiro.test(T_CCL20_Pre)
+wilcox.test(L_CCL20_Pre, T_CCL20_Pre)                   # Not significant - pvalue of 0.9432
+
+(mean(L_CCL20_Pre)-mean(T_CCL20_Pre)) / sqrt((sd(L_CCL20_Pre)^2+sd(T_CCL20_Pre)^2)/2)
+c<-cohen.d(L_CCL20_Pre, T_CCL20_Pre)
+pwr.t.test( d = c$estimate, sig.level =0.05 , power =0.8 ) # n = 229.0086
+
+# Each of the 4 immune cell markers represent different parts of the immune system. Are these markers effected differently by 
+# the anti-HER2 treatments (the post treatment cohort)? Look at trastuzumab and lapatinib separately.
+# Where there is no significant difference calculate the number of samples required to have 80% power to detect a statistically significant difference.
+
+ 
+
+table(Treatment_Arm, Treatment_Response)
+
+Responder_X_Treatment<- matrix(c(27,21,23,17), nr=2, dimnames=list("Response"=c("nonresponders","responders"), "Treatment_Arm"=c("Lapatinib","Trastuzumab")))
+Responder_X_Treatment
+chisq.test(Responder_X_Treatment)
+w<-ES.w2(Responder_X_Treatment/sum(Responder_X_Treatment))
+w
+pwr.chisq.test (w = w, df =1 , sig.level =0.05, power =0.8 )
+
+
+Is # there a significant increase in the number of underweight patients in the two treatment arms post treatment (classed as a BMI of < 20, “BMI_post_treatmetn”)?
+  # If not, how many samples would be needed to have an 80% power to detect a significant difference?
+# How many people were underweight in Trans v lap
+
+
+BMIPre <- ifelse(trial_data$BMI_pre_treatment <20,
+                 c("Underweight"), c("Normal"))
+
+
+BMI_X_Treatment <- ifelse(trial_data$BMI_post_treatment <20,
+                  c("Underweight"), c("Normal"))
+
+table(Treatment_Arm,BMI_X_Treatment)
+
+LAP_V_TRANS_BMI_Test<- matrix(c(9,12,39,28) , nr=2, dimnames=list("Treatment"=c("Lapatinib","Trastuzumab"),  "Underwieght"=c("Yes","No")))
+LAP_V_TRANS_BMI_Test
+chisq.test(LAP_V_TRANS_BMI_Test)
+w<-ES.w2(LAP_V_TRANS_BMI_Test/sum(LAP_V_TRANS_BMI_Test))
+pwr.chisq.test (w = w, df = 3, sig.level =0.05, power =0.8)
+
+#	23% of the Irish adult population is obese versus ~31% of samples in this dataset (classed as a BMI of >30, “BMI_pre_treatment”). How large would the study 
+#need to be to have an 80% power to detect a significant difference between HER-positive breast cancer patients and the Irish population as a whole?
+
+h<-ES.h(0.31,0.23)
+pwr.2p.test(h=h, sig.level=0.05,power=0.8)
+pwr.2p2n.test(h=h,n2=1000,sig.level=0.05,power=0.8)
